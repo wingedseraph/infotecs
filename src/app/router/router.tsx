@@ -1,6 +1,10 @@
 import App from '@/app/App';
-import Home from '@/pages/home/HomePage';
-import NotFound from '@/pages/not-found/NotFoundPage';
+import { ROUTES } from '@/app/router/consts';
+import LoginPage from '@/pages/login/LoginPage';
+import NotFoundPage from '@/pages/not-found/NotFoundPage';
+import UsersPage from '@/pages/users/UsersPage';
+import PrivateRoute from '@/shared/ui/PrivateRoute';
+import RedirectRoute from '@/shared/ui/RedirectRoute';
 import { createBrowserRouter } from 'react-router-dom';
 
 export const router = createBrowserRouter([
@@ -10,11 +14,23 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        Component: Home,
+        element: (
+          <RedirectRoute>
+            <LoginPage />
+          </RedirectRoute>
+        ),
       },
       {
-        path: '*',
-        Component: NotFound,
+        path: ROUTES.USERS,
+        element: (
+          <PrivateRoute>
+            <UsersPage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: ROUTES.NOT_FOUND,
+        Component: NotFoundPage,
       },
     ],
   },
