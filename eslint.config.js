@@ -13,6 +13,7 @@ export default [
     languageOptions: {
       globals: {
         ...globals.browser,
+        ...globals.node,
       },
       parser: tsParser,
       parserOptions: {
@@ -26,8 +27,8 @@ export default [
     },
     plugins: {
       '@typescript-eslint': tsPlugin,
-      'react': reactPlugin,
-      'prettier': prettierPlugin,
+      react: reactPlugin,
+      prettier: prettierPlugin,
     },
     settings: {
       react: {
@@ -45,3 +46,4 @@ export default [
     },
   },
 ];
+
