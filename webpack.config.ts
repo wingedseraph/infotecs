@@ -1,4 +1,5 @@
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import Dotenv from 'dotenv-webpack';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import type { Configuration, ResolveOptions, RuleSetRule } from 'webpack';
@@ -65,6 +66,7 @@ const configuration: ExtendedConfiguration = {
   module: { rules },
   resolve,
   plugins: [
+    new Dotenv(),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'index.html'),
     }),
