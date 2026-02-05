@@ -1,11 +1,11 @@
-import { router } from '@/app/router/router';
 import { AppProviders } from '@/app/providers/AppProviders';
-import React from 'react';
+import { router } from '@/app/router/router';
+import { StrictMode } from 'react';
 import ReactDOM from 'react-dom';
 import { RouterProvider } from 'react-router-dom';
 
 ReactDOM.render(
-  <React.StrictMode>
+  <StrictMode>
     <AppProviders>
       <RouterProvider
         router={router}
@@ -14,6 +14,6 @@ ReactDOM.render(
         }}
       />
     </AppProviders>
-  </React.StrictMode>,
+  </StrictMode>,
   document.getElementById('root')
 );
