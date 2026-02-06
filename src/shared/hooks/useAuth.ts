@@ -1,4 +1,4 @@
-import { UserWithoutId } from '@/entities/user';
+import { UserWithoutId } from '@/entities/AuthUser';
 import { login as loginApi } from '@/shared/api/auth-api';
 import { AUTH_MESSAGE } from '@/shared/api/constants';
 import { isLoggedIn, removeToken, setToken } from '@/shared/lib/auth-service';
@@ -26,7 +26,7 @@ export const useAuth = () => {
 
   const logout = () => {
     removeToken();
-    navigate('/login');
+    navigate('/');
   };
 
   return {
