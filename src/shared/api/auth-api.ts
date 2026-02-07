@@ -1,8 +1,7 @@
 import { UserWithoutId } from '@/entities/AuthUser';
 import { AUTH_MESSAGE } from '@/shared/api/constants';
 
-const defaultCredential =
-  String(process.env.DEFAULT_CREDENTIAL) || ('admin' as const);
+const defaultCredential = process.env.DEFAULT_CREDENTIAL || ('admin' as const);
 
 export const login = async (user: UserWithoutId) => {
   await new Promise(resolve => setTimeout(resolve, 2000));

@@ -6,7 +6,7 @@ import { isString } from 'antd/es/button';
 import axios from 'axios';
 
 const BASE_URL =
-  String(process.env.API_URL) ||
+  process.env.API_URL ||
   ('https://698356809c3efeb892a5695b.mockapi.io/users' as const);
 
 const dataItemSchema: Schema<ApiUser> = {
