@@ -1,95 +1,84 @@
+import { ApiUser } from '@/entities/ApiUser';
 import { ButtonContainer } from '@/pages/login/LoginPage';
-import { getUsers } from '@/shared/api/users-api';
+import UserModal from '@/pages/users/UserModal';
+import UsersList from '@/pages/users/UsersList';
+import { useGetUsers } from '@/shared/api/users-hooks';
 import { useAuth } from '@/shared/hooks/useAuth';
-import { useQuery } from '@tanstack/react-query';
-import { Button, Spin } from 'antd';
-import dayjs from 'dayjs';
-import styled from 'styled-components';
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 1rem;
-  margin: 1rem;
-  width: clamp(390px, 70vw, 1200px);
-`;
-const List = styled.ul`
-  list-style: none;
-  padding: 10px 20px;
-`;
-const ListItem = styled.li`
-  display: flex;
-  align-items: center;
-  margin: 10px;
-  padding: 5px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  img {
-    border-radius: 50%;
-    width: 64px;
-    height: 64px;
-    margin-right: 15px;
-  }
-
-  h4,
-  p {
-    margin: 0;
-  }
-
-  h4 {
-    margin-top: 10px;
-    font-size: 18px;
-  }
-
-  p {
-    margin-top: 5px;
-    color: #aaa;
-  }
-`;
-const UserItemButton = styled.button.attrs({ type: 'button' })`
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  text-align: left;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-`;
+import { getErrorMessage } from '@/shared/lib/error-utils';
+import { Container } from '@/shared/ui/Container';
+import { Button, Form, Spin } from 'antd';
+import { useState } from 'react';
+import { useUserForm } from './useUserForm';
 
 const UsersPage = () => {
+  const [mode, setMode] = useState<'create' | 'edit' | null>(null);
+  const [currentUser, setCurrentUser] = useState<ApiUser | null>(null);
+  const [form] = Form.useForm();
+
   const {
-    data: users,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
-    queryFn: getUsers,
-    queryKey: ['users'],
-  });
+    handleCreate,
+    handleUpdate,
+    handleDelete,
+    isCreating,
+    isUpdating,
+    isDeleting,
+  } = useUserForm();
+
+  const openCreate = () => {
+    setMode('create');
+    setCurrentUser(null);
+    form.resetFields();
+  };
+
+  const openEdit = (user: ApiUser) => {
+    setMode('edit');
+    setCurrentUser(user);
+    form.setFieldsValue({
+      id: user.id,
+      name: user.name,
+      avatar: user.avatar,
+    });
+  };
+
+  const closeModal = () => {
+    setMode(null);
+    setCurrentUser(null);
+    form.resetFields();
+  };
+
+  const handleOk = async () => {
+    if (mode === 'create') {
+      await handleCreate(form);
+    } else if (mode === 'edit' && currentUser) {
+      await handleUpdate(form, currentUser);
+    }
+  };
+
+  const handleDeleteUser = () => {
+    if (currentUser) {
+      handleDelete(currentUser);
+      closeModal();
+    }
+  };
+
+  const { data: users, isLoading, isError, error } = useGetUsers();
+
   const auth = useAuth();
   const handleLogout = () => auth.logout();
 
   if (isLoading)
     return (
       <Container>
-        <Spin />;
+        <Spin />
       </Container>
     );
   if (isError)
     return (
       <Container>
-        <h1>Ошибка загрузки: {error}</h1>
+        <h1>
+          Ошибка загрузки:
+          {getErrorMessage(error)}
+        </h1>
       </Container>
     );
 
@@ -102,25 +91,24 @@ const UsersPage = () => {
       </ButtonContainer>
 
       <Container>
-        <List>
-          {users?.map(user => (
-            <ListItem key={user.id}>
-              <UserItemButton>
-                <img src={user.avatar} alt={user.name} />
-                <Container>
-                  <h4>{user.name}</h4>
-                  <p>
-                    Зарегистрирован {dayjs(user.createdAt).format('DD.MM.YYYY')}
-                  </p>
-                </Container>
-              </UserItemButton>
-            </ListItem>
-          ))}
-        </List>
+        <UsersList users={users ?? []} onUserClick={openEdit} />
       </Container>
 
       <div>
-        <Button type="primary">Создать пользователя</Button>
+        <Button onClick={openCreate} type="primary">
+          Создать пользователя
+        </Button>
+
+        <UserModal
+          mode={mode}
+          form={form}
+          isCreating={isCreating}
+          isUpdating={isUpdating}
+          isDeleting={isDeleting}
+          onClose={closeModal}
+          onSubmit={handleOk}
+          onDelete={handleDeleteUser}
+        />
       </div>
     </Container>
   );
