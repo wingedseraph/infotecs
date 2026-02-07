@@ -1,4 +1,6 @@
 import { ApiUser } from '@/entities/ApiUser';
+import { GENERIC_RESPONSE_MESSAGE } from '@/shared/api/constants';
+import { getErrorMessage } from '@/shared/lib/error-utils';
 import { isArray, Schema, validateObject } from '@/shared/lib/guards';
 import { isString } from 'antd/es/button';
 import axios from 'axios';
@@ -14,10 +16,10 @@ const dataItemSchema: Schema<ApiUser> = {
   name: isString,
 };
 
-export const isDataItem = (data: unknown): data is ApiUser =>
+const isDataItem = (data: unknown): data is ApiUser =>
   validateObject(data, dataItemSchema);
 
-export const isDataItemArray = (data: unknown): data is ApiUser[] => {
+const isDataItemArray = (data: unknown): data is ApiUser[] => {
   return isArray(data, isDataItem);
 };
 
@@ -26,14 +28,51 @@ export async function getUsers() {
     const response = await axios.get(BASE_URL);
 
     if (!isDataItemArray(response.data)) {
-      throw new Error('Некорректные данные с API');
+      throw new Error(GENERIC_RESPONSE_MESSAGE.WRONG_API_DATA);
     }
 
     return response.data;
   } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(error.message);
+    const errorMessage = getErrorMessage(error);
+    throw new Error(errorMessage);
+  }
+}
+
+export async function createUser(userData: Omit<ApiUser, 'id' | 'createdAt'>) {
+  try {
+    const response = await axios.post(BASE_URL, userData);
+
+    if (!isDataItem(response.data)) {
+      throw new Error(GENERIC_RESPONSE_MESSAGE.WRONG_API_DATA);
     }
-    throw new Error('Что-то пошло не так');
+
+    return response.data;
+  } catch (error) {
+    const errorMessage = getErrorMessage(error);
+    throw new Error(errorMessage);
+  }
+}
+
+export async function updateUser(userData: Omit<ApiUser, 'createdAt'>) {
+  try {
+    const response = await axios.put(`${BASE_URL}/${userData.id}`, userData);
+
+    if (!isDataItem(response.data)) {
+      throw new Error(GENERIC_RESPONSE_MESSAGE.WRONG_API_DATA);
+    }
+
+    return response.data;
+  } catch (error) {
+    const errorMessage = getErrorMessage(error);
+    throw new Error(errorMessage);
+  }
+}
+
+export async function deleteUser(id: string) {
+  try {
+    await axios.delete(`${BASE_URL}/${id}`);
+  } catch (error) {
+    const errorMessage = getErrorMessage(error);
+    throw new Error(errorMessage);
   }
 }
